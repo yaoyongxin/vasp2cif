@@ -56,13 +56,31 @@ import re
 from subprocess import Popen,call,PIPE
 from optparse import OptionParser
 
+# special case
+bohr2aa = 0.529177
 # Input parser
 parser = OptionParser()
-parser.add_option("-v","--verbose",dest="verbose",help="Print CIF to stdout",action="store_true")
-parser.add_option("-o","--output",dest="output",help="Save CIF to named file",metavar="FILE")
-parser.add_option("-e","--elements",dest="elements",help="""Supply elements if no POTCAR is present. Example: --elements="Fe,Co,Ni" """,metavar="list of elements")
-parser.add_option("--findsym-tolerance",dest="findsymtol",help="""Tolerance used for FINDSYM (default=0, minimal value).""")
-parser.add_option("--no-findsym",dest="nofindsym",help="""Don't run FINDSYM to find symmetry of the crystal.""")
+parser.add_option("-v","--verbose",
+        dest="verbose",
+        help="Print CIF to stdout",
+        action="store_true")
+parser.add_option("--bohr2aa",
+        help="Bohr to angstrom conversion",
+        action="store_true")
+parser.add_option("-o","--output",
+        dest="output",
+        help="Save CIF to named file",
+        metavar="FILE")
+parser.add_option("-e","--elements",
+        dest="elements",
+        help="""Supply elements if no POTCAR is present. Example: --elements="Fe,Co,Ni" """,
+        metavar="list of elements")
+parser.add_option("--findsym-tolerance",
+        dest="findsymtol",
+        help="""Tolerance used for FINDSYM (default=0, minimal value).""")
+parser.add_option("--no-findsym",
+        dest="nofindsym",
+        help="""Don't run FINDSYM to find symmetry of the crystal.""")
 (options,args) = parser.parse_args()
 
 ####### FINDSYM ######
@@ -323,6 +341,11 @@ for input_file,filename in input_files:
         if lattice_constant < 0.0:
             lattice_constant = 1.0
             scale_volume = True
+            if options.bohr2aa:
+                final_volume *= bohr2aa**3
+        else:
+            if options.bohr2aa:
+                lattice_constant *= bohr2aa
 
         #Read cell vectors
         a = []
